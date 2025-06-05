@@ -2,16 +2,18 @@
 const int pwmPin = 9;  // OCR1A en Arduino Uno
 
 // Parámetros de la LSV triangular
-const uint16_t NSAMPLES      = 300;            // Número de escalones
-const uint32_t RAMP_TIME_US  = 12500000UL;     // Tiempo de subida/bajada: 12,5 s = 12.500.000 µs
-const uint32_t STEP_US       = RAMP_TIME_US / NSAMPLES;  // ≈ 41.6 ms por escalón
-const uint16_t MAX_DUTY      = 1023;           // PWM de 10 bits
+const uint16_t NSAMPLES     = 300;                 // Escalones por rampa
+const uint32_t RAMP_TIME_US = 12500000UL;          // 12.5 s por subida o bajada
+const uint32_t STEP_US      = RAMP_TIME_US / NSAMPLES;
+const uint16_t MAX_DUTY     = 4095;                // PWM de 12 bits
 
 void setup() {
-  // Configurar Timer1 en Fast PWM de 10 bits
-  TCCR1A = _BV(COM1A1) | _BV(WGM11) | _BV(WGM10);
-  TCCR1B = _BV(CS10);  // Sin preescaler → fPWM ≈ 15.6 kHz
   pinMode(pwmPin, OUTPUT);
+
+  // Configurar Timer1 en Fast PWM, modo 14: WGM13:0 = 1110 (TOP = ICR1)
+  TCCR1A = _BV(COM1A1) | _BV(WGM11);               // COM1A1 para salida no inversa
+  TCCR1B = _BV(WGM13) | _BV(WGM12) | _BV(CS10);    // prescaler = 1
+  ICR1 = MAX_DUTY;                                 // TOP = 4095 → 12 bits
 }
 
 void loop() {
@@ -39,4 +41,6 @@ void loop() {
 
   // Repetir indefinidamente
 }
+
+
 
